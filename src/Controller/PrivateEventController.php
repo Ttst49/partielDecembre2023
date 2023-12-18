@@ -59,19 +59,37 @@ class PrivateEventController extends AbstractController
                                        EntityManagerInterface $manager
     ):Response{
 
+
+
+
+
         $newPrivateEvent = $serializer->deserialize($request->getContent(),Event::class,"json");
         $newPrivateEvent->setIsPrivate(true);
         $newPrivateEvent->setHost($this->getUser()->getProfile());
         $newPrivateEvent->addParticipant($this->getUser()->getProfile());
-
-        $manager->persist($newPrivateEvent);
-        $manager->flush();
 
         $response = [
             "content"=>"You created a private Event!",
             "status"=>201,
             "new Event Infos"=>$newPrivateEvent
         ];
+
+
+
+        if ($newPrivateEvent->getEndOn() < $newPrivateEvent->getstartOn() ){
+            $response = [
+                "content"=>"You can't define an end date arriving after the starting date",
+                "status"=>403,
+            ];
+        }elseif ($newPrivateEvent->getstartOn() < new \DateTime()){
+            $response = [
+                "content"=>"You can't define a starting date before today",
+                "status"=>403,
+            ];
+        }else{
+            $manager->persist($newPrivateEvent);
+            $manager->flush();
+        }
 
 
         return $this->json($response,200,[],["groups"=>"forEventIndexing"]);
