@@ -80,6 +80,7 @@ class Event
         $this->suggestions = new ArrayCollection();
         $this->isScheduled = true;
         $this->supportedStandalones = new ArrayCollection();
+        $this->administrators = new ArrayCollection();
     }
 
     public function getId(): ?int
