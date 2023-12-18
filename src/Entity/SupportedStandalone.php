@@ -5,15 +5,19 @@ namespace App\Entity;
 use App\Repository\SupportedStandaloneRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: SupportedStandaloneRepository::class)]
 class SupportedStandalone
 {
+
+    #[Groups(["forGroupIndexing"])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Groups(["forGroupIndexing"])]
     #[ORM\Column(type: Types::TEXT)]
     private ?string $title = null;
 

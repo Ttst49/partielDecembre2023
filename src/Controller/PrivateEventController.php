@@ -6,6 +6,7 @@ use App\Entity\Event;
 use App\Entity\Invitation;
 use App\Entity\Profile;
 use App\Entity\Suggestion;
+use App\Entity\SupportedStandalone;
 use App\Repository\EventRepository;
 use App\Repository\InvitationStatusRepository;
 use App\Repository\ProfileRepository;
@@ -307,7 +308,7 @@ class PrivateEventController extends AbstractController
     /**
      * @param Suggestion $suggestion
      * @return Response
-     * support and stop supporting suggestion and transform it into a contribution
+     * support suggestion and transform it into a contribution and stop supporting suggestion
      */
     #[Route('/private/event/stopSupportSuggestion/{id}',methods: "PUT")]
     #[Route('/private/event/supportSuggestion/{id}',methods: "PUT")]
@@ -355,6 +356,43 @@ class PrivateEventController extends AbstractController
     }
 
 
+    #[Route('/private/event/addSupport/{id}',methods: "POST")]
+    public function addStandaloneSupport(Event $event,
+                                         SerializerInterface $serializer,
+                                         EntityManagerInterface $manager,
+                                         Request $request):Response{
+
+        $newSupport = $serializer->deserialize($request->getContent(),SupportedStandalone::class,"json");
+        $newSupport->setSupportedBy($this->getUser()->getProfile());
+        $newSupport->setAssociatedEvent($event);
+
+        $manager->persist($newSupport);
+        $manager->flush();
+
+        $response = [
+            "content"=>"You made a contribution to this event",
+            "status"=>200,
+            "new contribution"=>$newSupport
+        ];
+
+        return $this->json($response,200,[],["groups"=>"forGroupIndexing"]);
+    }
+
+
+    #[Route('/private/event/removeSupport/{id}',methods: "DELETE")]
+    public function removeStandaloneSupport(SupportedStandalone $standalone,
+                                            EntityManagerInterface $manager):Response{
+
+        $manager->remove($standalone);
+        $manager->flush();
+
+        $response = [
+            "content"=>"You successfully remove this support",
+            "status"=>200,
+        ];
+
+        return $this->json($response,200);
+    }
 
 
 
