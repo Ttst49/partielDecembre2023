@@ -81,8 +81,33 @@ class UserController extends AbstractController
 
 
 
-    public function denyInvitation(Invitation $invitation){
+    #[Route('/invitations/deny/{id}',methods: "PUT")]
+    public function denyInvitation(Invitation $invitation,
+                                   InvitationStatusRepository $repository,
+                                   EntityManagerInterface $manager):Response{
+        $response = [
+            "content"=>"You denied the invitation, sad to see you leave!",
+            "status"=>200,
+            "invitation"=>$invitation
+        ];
 
+        if ($invitation->getStatus()->getName() == "Refused"){
+            $response["content"] = "You already denied this one!";
+        }
+
+
+        if ($invitation->getToEvent()->getstartOn() < new \DateTime()){
+            $response = [
+                "content"=>"This event is not available, since it already started",
+                "status"=>200,
+            ];
+        }
+
+        $invitation->setStatus($repository->find(3));
+
+        $manager->persist($invitation);
+        $manager->flush();
+        return $this->json($response,200);
     }
 
 }
