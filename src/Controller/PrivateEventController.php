@@ -383,13 +383,19 @@ class PrivateEventController extends AbstractController
     public function removeStandaloneSupport(SupportedStandalone $standalone,
                                             EntityManagerInterface $manager):Response{
 
-        $manager->remove($standalone);
-        $manager->flush();
-
         $response = [
             "content"=>"You successfully remove this support",
             "status"=>200,
         ];
+
+        if ($standalone->getSupportedBy()->getAssociatedTo()->getProfile() == $this->getUser()->getProfile()
+            or $standalone->getAssociatedEvent()->getHost() == $this->getUser()->getProfile()){
+            $manager->remove($standalone);
+            $manager->flush();
+        }else{
+            $response["content"]= "You can't remove support you're not hosting or didn't made";
+        }
+
 
         return $this->json($response,200);
     }
