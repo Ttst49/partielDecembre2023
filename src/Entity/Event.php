@@ -60,6 +60,9 @@ class Event
     #[ORM\OneToMany(mappedBy: 'toEvent', targetEntity: Invitation::class, orphanRemoval: true)]
     private Collection $invitationsToEvent;
 
+    #[ORM\Column]
+    private ?bool $isScheduled = null;
+
     public function __construct()
     {
         $this->participants = new ArrayCollection();
@@ -219,6 +222,18 @@ class Event
                 $invitationsToEvent->setToEvent(null);
             }
         }
+
+        return $this;
+    }
+
+    public function isIsScheduled(): ?bool
+    {
+        return $this->isScheduled;
+    }
+
+    public function setIsScheduled(bool $isScheduled): static
+    {
+        $this->isScheduled = $isScheduled;
 
         return $this;
     }
