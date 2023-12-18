@@ -4,7 +4,8 @@ namespace App\Controller;
 
 use App\Entity\Event;
 use App\Repository\EventRepository;
-use Symfony\Bridge\Doctrine\Attribute\MapEntity;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -34,7 +35,7 @@ class PublicEventController extends AbstractController
      * attending to an event if you're not the host of it
      */
     #[Route('/public/event/attend/{id}', methods: "PUT")]
-    public function attendToEvent(Event $event):Response{
+    public function attendToEvent(Event $event, EntityManagerInterface $manager):Response{
 
         $response = [
             "content"=>"You're the host of this event, you can't attend to it!",
@@ -42,8 +43,10 @@ class PublicEventController extends AbstractController
         ];
 
         if ($event->getHost() != $this->getUser()->getProfile()){
-            $event->addParticipant($this->getUser()->getProfile());
             $response["content"] = "You're now attending to the event".$event->getId();
+            $event->addParticipant($this->getUser()->getProfile());
+            $manager->persist($event);
+            $manager->flush();
         }
 
         foreach ($event->getParticipants() as $participant){
@@ -54,6 +57,29 @@ class PublicEventController extends AbstractController
 
         return $this->json($response,200);
 
+    }
+
+
+    /**
+     * @param Event $event
+     * @return Response
+     * return all the participants from an event with it id
+     */
+    #[Route('/public/event/getParticipants/{id}')]
+    public function getAllParticipantsFromPublicEvent(Event $event):Response{
+
+        $participants = new ArrayCollection();
+        foreach ($event->getParticipants() as $participant){
+            $participants->add($participant);
+        }
+
+        $response = [
+            "content"=>"There are the participants to event with id ".$event->getId(),
+            "status"=>200,
+            "participants"=>$participants
+        ];
+
+        return $this->json($response,200,[],["groups"=>"forUserIndexing"]);
     }
 
 }
