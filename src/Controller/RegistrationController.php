@@ -14,6 +14,15 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 class RegistrationController extends AbstractController
 {
+
+    /**
+     * @param SerializerInterface $serializer
+     * @param Request $request
+     * @param UserPasswordHasherInterface $userPasswordHasher
+     * @param EntityManagerInterface $manager
+     * @return Response
+     * Create a new user in the application and define to it a new profile
+     */
     #[Route('/register', methods: "POST")]
     public function registerApi(SerializerInterface $serializer,Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $manager): Response
     {
@@ -29,11 +38,20 @@ class RegistrationController extends AbstractController
             )
         );
 
+        $user->setProfile(new Profile());
+        $user->getProfile()->setDisplayName($user->getUsername());
+
 
         $manager->persist($user);
         $manager->flush();
 
-        return $this->json("L'utilisateur a bien été créé", 200, [], ["groups" => "forCreation"]);
+        $response = [
+            "content"=> "The user ".$user->getProfile()->getDisplayName()." has been created",
+            "status"=>201,
+            "user"=>$user
+        ];
+
+        return $this->json($response, 201, [], ["groups" => "forUserIndexing"]);
 
     }
 }

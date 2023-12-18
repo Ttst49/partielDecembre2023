@@ -29,9 +29,13 @@ class Profile
     #[ORM\OneToMany(mappedBy: 'host', targetEntity: Event::class, orphanRemoval: true)]
     private Collection $events;
 
+    #[ORM\ManyToMany(targetEntity: Event::class, mappedBy: 'participants')]
+    private Collection $eventsAsParticipant;
+
     public function __construct()
     {
         $this->events = new ArrayCollection();
+        $this->eventsAsParticipant = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -88,6 +92,33 @@ class Profile
             if ($event->getHost() === $this) {
                 $event->setHost(null);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Event>
+     */
+    public function getEventsAsParticipant(): Collection
+    {
+        return $this->eventsAsParticipant;
+    }
+
+    public function addEventsAsParticipant(Event $eventsAsParticipant): static
+    {
+        if (!$this->eventsAsParticipant->contains($eventsAsParticipant)) {
+            $this->eventsAsParticipant->add($eventsAsParticipant);
+            $eventsAsParticipant->addParticipant($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEventsAsParticipant(Event $eventsAsParticipant): static
+    {
+        if ($this->eventsAsParticipant->removeElement($eventsAsParticipant)) {
+            $eventsAsParticipant->removeParticipant($this);
         }
 
         return $this;

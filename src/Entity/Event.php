@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\EventRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
@@ -44,6 +46,14 @@ class Event
     #[Groups(["forEventIndexing"])]
     #[ORM\Column]
     private ?bool $isPlacePrivate = null;
+
+    #[ORM\ManyToMany(targetEntity: Profile::class, inversedBy: 'eventsAsParticipant')]
+    private Collection $participants;
+
+    public function __construct()
+    {
+        $this->participants = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -130,6 +140,30 @@ class Event
     public function setIsPlacePrivate(bool $isPlacePrivate): static
     {
         $this->isPlacePrivate = $isPlacePrivate;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Profile>
+     */
+    public function getParticipants(): Collection
+    {
+        return $this->participants;
+    }
+
+    public function addParticipant(Profile $participant): static
+    {
+        if (!$this->participants->contains($participant)) {
+            $this->participants->add($participant);
+        }
+
+        return $this;
+    }
+
+    public function removeParticipant(Profile $participant): static
+    {
+        $this->participants->removeElement($participant);
 
         return $this;
     }
