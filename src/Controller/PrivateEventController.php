@@ -2,12 +2,16 @@
 
 namespace App\Controller;
 
+use App\Entity\Event;
 use App\Repository\EventRepository;
 use App\Repository\ProfileRepository;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\SerializerInterface;
 
 #[Route('/api')]
 class PrivateEventController extends AbstractController
@@ -18,7 +22,7 @@ class PrivateEventController extends AbstractController
      * @return Response
      * get all the private events you're attending to
      */
-    #[Route('/private/event/index', name: 'app_private_event')]
+    #[Route('/private/event/index', methods: "GET")]
     public function getAllPrivateEvents(ProfileRepository $profileRepository, EventRepository $eventRepository): Response
     {
         $profile = $profileRepository->find($this->getUser()->getProfile()->getId());
@@ -40,4 +44,37 @@ class PrivateEventController extends AbstractController
 
         return $this->json($response,200,[],["groups"=>"forEventIndexing"]);
     }
+
+
+    /**
+     * @param SerializerInterface $serializer
+     * @param Request $request
+     * @param EntityManagerInterface $manager
+     * @return Response
+     * create a new private event and define it default values as a private event
+     */
+    #[Route('/private/event/create',methods: "POST")]
+    public function createPrivateEvent(SerializerInterface $serializer,
+                                       Request $request,
+                                       EntityManagerInterface $manager
+    ):Response{
+
+        $newPrivateEvent = $serializer->deserialize($request->getContent(),Event::class,"json");
+        $newPrivateEvent->setIsPrivate(true);
+        $newPrivateEvent->setHost($this->getUser()->getProfile());
+        $newPrivateEvent->addParticipant($this->getUser()->getProfile());
+
+        $manager->persist($newPrivateEvent);
+        $manager->flush();
+
+        $response = [
+            "content"=>"You created a private Event!",
+            "status"=>201,
+            "new Event Infos"=>$newPrivateEvent
+        ];
+
+
+        return $this->json($response,200,[],["groups"=>"forEventIndexing"]);
+    }
+
 }

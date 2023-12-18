@@ -28,7 +28,7 @@ class Event
 
     #[Groups(["forEventIndexing"])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $StartOn = null;
+    private ?\DateTimeInterface $startOn = null;
 
     #[Groups(["forEventIndexing"])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
@@ -84,14 +84,14 @@ class Event
         return $this;
     }
 
-    public function getStartOn(): ?\DateTimeInterface
+    public function getstartOn(): ?\DateTimeInterface
     {
-        return $this->StartOn;
+        return $this->startOn;
     }
 
-    public function setStartOn(\DateTimeInterface $StartOn): static
+    public function setstartOn(\DateTimeInterface $startOn): static
     {
-        $this->StartOn = $StartOn;
+        $this->startOn = $startOn;
 
         return $this;
     }

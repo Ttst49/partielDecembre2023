@@ -65,7 +65,7 @@ class PublicEventController extends AbstractController
      * @return Response
      * return all the participants from an event with it id
      */
-    #[Route('/public/event/getParticipants/{id}')]
+    #[Route('/public/event/getParticipants/{id}', methods: "GET")]
     public function getAllParticipantsFromPublicEvent(Event $event):Response{
 
         $participants = new ArrayCollection();
