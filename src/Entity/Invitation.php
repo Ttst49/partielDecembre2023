@@ -4,19 +4,23 @@ namespace App\Entity;
 
 use App\Repository\InvitationRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: InvitationRepository::class)]
 class Invitation
 {
+    #[Groups(["forInvitationPurpose"])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Groups(["forInvitationPurpose"])]
     #[ORM\ManyToOne(inversedBy: 'invitationsAsRecipient')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Profile $recipient = null;
 
+    #[Groups(["forInvitationPurpose"])]
     #[ORM\ManyToOne(inversedBy: 'invitationsToEvent')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Event $toEvent = null;

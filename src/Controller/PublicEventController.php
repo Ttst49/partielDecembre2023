@@ -7,8 +7,10 @@ use App\Repository\EventRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\SerializerInterface;
 
 #[Route('/api')]
 class PublicEventController extends AbstractController
@@ -58,6 +60,52 @@ class PublicEventController extends AbstractController
         return $this->json($response,200);
 
     }
+
+    /**
+     * @param SerializerInterface $serializer
+     * @param Request $request
+     * @param EntityManagerInterface $manager
+     * @return Response
+     * create a new public event and define it default values as a public event
+     */
+    #[Route('/public/event/create',methods: "POST")]
+    public function createPrivateEvent(SerializerInterface $serializer,
+                                       Request $request,
+                                       EntityManagerInterface $manager):Response{
+
+        $newPublicEvent = $serializer->deserialize($request->getContent(),Event::class,"json");
+        $newPublicEvent->setIsPrivate(false);
+        $newPublicEvent->setHost($this->getUser()->getProfile());
+        $newPublicEvent->addParticipant($this->getUser()->getProfile());
+
+        $response = [
+            "content"=>"You created a public Event!",
+            "status"=>201,
+            "new Event Infos"=>$newPublicEvent
+        ];
+
+
+
+        if ($newPublicEvent->getEndOn() < $newPublicEvent->getstartOn() ){
+            $response = [
+                "content"=>"You can't define an end date arriving after the starting date",
+                "status"=>403,
+            ];
+        }elseif ($newPublicEvent->getstartOn() < new \DateTime()){
+            $response = [
+                "content"=>"You can't define a starting date before today",
+                "status"=>403,
+            ];
+        }else{
+            $manager->persist($newPublicEvent);
+            $manager->flush();
+        }
+
+
+        return $this->json($response,200,[],["groups"=>"forEventIndexing"]);
+    }
+
+
 
 
     /**

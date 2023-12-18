@@ -12,13 +12,13 @@ use Symfony\Component\Serializer\Attribute\Groups;
 #[ORM\Entity(repositoryClass: ProfileRepository::class)]
 class Profile
 {
-    #[Groups(["forEventIndexing","forUserIndexing"])]
+    #[Groups(["forEventIndexing","forUserIndexing","forInvitationPurpose"])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[Groups(["forEventIndexing","forUserIndexing"])]
+    #[Groups(["forEventIndexing","forUserIndexing","forInvitationPurpose"])]
     #[ORM\Column(type: Types::TEXT)]
     private ?string $displayName = null;
 

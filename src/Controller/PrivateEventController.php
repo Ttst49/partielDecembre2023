@@ -3,8 +3,12 @@
 namespace App\Controller;
 
 use App\Entity\Event;
+use App\Entity\Invitation;
+use App\Entity\Profile;
 use App\Repository\EventRepository;
+use App\Repository\InvitationStatusRepository;
 use App\Repository\ProfileRepository;
+use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -56,12 +60,7 @@ class PrivateEventController extends AbstractController
     #[Route('/private/event/create',methods: "POST")]
     public function createPrivateEvent(SerializerInterface $serializer,
                                        Request $request,
-                                       EntityManagerInterface $manager
-    ):Response{
-
-
-
-
+                                       EntityManagerInterface $manager):Response{
 
         $newPrivateEvent = $serializer->deserialize($request->getContent(),Event::class,"json");
         $newPrivateEvent->setIsPrivate(true);
@@ -93,6 +92,68 @@ class PrivateEventController extends AbstractController
 
 
         return $this->json($response,200,[],["groups"=>"forEventIndexing"]);
+    }
+
+
+    /**
+     * @param Event $event
+     * @param EntityManagerInterface $manager
+     * @param UserRepository $userRepository
+     * @param InvitationStatusRepository $statusRepository
+     * @param $userId
+     * @return Response
+     * create a new invitation to a private event and send it to a user
+     */
+    #[Route('/private/event/invite/{id}/{userId}', methods: "POST")]
+    public function inviteToPrivateEvent(Event $event,
+                                         EntityManagerInterface $manager,
+                                         UserRepository $userRepository,
+                                         InvitationStatusRepository $statusRepository,
+                                         $userId):Response{
+
+        $searchedProfile = $userRepository->find($userId)->getProfile();
+        $actualProfile = $userRepository->find($this->getUser())->getProfile();
+
+        if ($event->getHost() !== $actualProfile){
+            $response = [
+                "content"=>"You're not the owner of this event, you can't invite into It",
+                "status"=>403
+            ];
+            return $this->json($response,403);
+        }elseif ($event->getHost() === $searchedProfile){
+            $response = [
+                "content"=>"You can't invite yourself into a private event",
+                "status"=>403
+            ];
+            return $this->json($response,403);
+        }
+
+        foreach ($searchedProfile->getInvitationsAsRecipient() as $invitation){
+            if ($invitation->getToEvent()->getHost() === $actualProfile){
+                $response = [
+                    "content"=>"You already been invited to this event",
+                    "status"=>200
+                ];
+                return $this->json($response,200);
+            }
+        }
+
+
+        $invitation = new Invitation();
+        $invitation->setRecipient($searchedProfile);
+        $invitation->setToEvent($event);
+        $invitation->setStatus($statusRepository->find(1));
+
+        $manager->persist($invitation);
+        $manager->flush();
+
+        $response = [
+            "content"=>"You successfuly created a new invitation to the private event with id ".$event->getId(),
+            "status"=>201,
+            "invitation"=>$invitation
+        ];
+
+        return $this->json($response,201,[],["groups"=>"forInvitationPurpose"]);
     }
 
 }

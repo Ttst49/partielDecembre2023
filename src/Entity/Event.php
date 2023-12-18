@@ -13,17 +13,17 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: EventRepository::class)]
 class Event
 {
-    #[Groups(["forEventIndexing"])]
+    #[Groups(["forEventIndexing","forInvitationPurpose"])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[Groups(["forEventIndexing"])]
+    #[Groups(["forEventIndexing","forInvitationPurpose"])]
     #[ORM\Column(length: 255)]
     private ?string $place = null;
 
-    #[Groups(["forEventIndexing"])]
+    #[Groups(["forEventIndexing","forInvitationPurpose"])]
     #[ORM\Column(type: Types::TEXT)]
     private ?string $description = null;
 
@@ -35,7 +35,7 @@ class Event
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $endOn = null;
 
-    #[Groups(["forEventIndexing"])]
+    #[Groups(["forEventIndexing","forInvitationPurpose"])]
     #[ORM\ManyToOne(inversedBy: 'events')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Profile $host = null;
@@ -51,10 +51,10 @@ class Event
     #[ORM\ManyToMany(targetEntity: Profile::class, inversedBy: 'eventsAsParticipant')]
     private Collection $participants;
 
-    #[Groups(["forEventIndexing"])]
+    #[Groups(["forEventIndexing","forInvitationPurpose"])]
     private string $startDateInFormat;
 
-    #[Groups(["forEventIndexing"])]
+    #[Groups(["forEventIndexing","forInvitationPurpose"])]
     private string $endDateInFormat;
 
     #[ORM\OneToMany(mappedBy: 'toEvent', targetEntity: Invitation::class, orphanRemoval: true)]
