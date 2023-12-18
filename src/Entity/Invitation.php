@@ -25,6 +25,7 @@ class Invitation
     #[ORM\JoinColumn(nullable: false)]
     private ?Event $toEvent = null;
 
+    #[Groups(["forInvitationPurpose"])]
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private ?InvitationStatus $status = null;

@@ -2,7 +2,10 @@
 
 namespace App\Controller;
 
+use App\Entity\Invitation;
+use App\Repository\InvitationStatusRepository;
 use App\Repository\UserRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -42,6 +45,44 @@ class UserController extends AbstractController
 
 
         return $this->json($response,200,[],["groups"=>"forInvitationPurpose"]);
+    }
+
+    #[Route('/invitations/accept/{id}', methods: "PUT")]
+    public function acceptInvitation(Invitation $invitation,
+                                     InvitationStatusRepository $repository,
+                                     EntityManagerInterface $manager):Response{
+
+        $response = [
+            "content"=>"You accepted the invitation, see you there!",
+            "status"=>200,
+            "invitation"=>$invitation
+        ];
+
+
+        if ($invitation->getStatus()->getName() == "Accepted"){
+            $response["content"] = "You already accepted this one!";
+        }
+
+
+        if ($invitation->getToEvent()->getstartOn() < new \DateTime()){
+            $response = [
+                "content"=>"This event is not available, since it already started",
+                "status"=>200,
+            ];
+            $invitation->setStatus($repository->find(3));
+        }else{
+            $invitation->setStatus($repository->find(2));
+        }
+
+        $manager->persist($invitation);
+        $manager->flush();
+        return $this->json($response,200,[],["groups"=>"forInvitationPurpose"]);
+    }
+
+
+
+    public function denyInvitation(Invitation $invitation){
+
     }
 
 }
