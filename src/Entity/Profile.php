@@ -39,12 +39,16 @@ class Profile
     #[ORM\OneToMany(mappedBy: 'sender', targetEntity: Invitation::class)]
     private Collection $invitationsAsSender;
 
+    #[ORM\OneToMany(mappedBy: 'supportedBy', targetEntity: Suggestion::class)]
+    private Collection $suggestions;
+
     public function __construct()
     {
         $this->events = new ArrayCollection();
         $this->eventsAsParticipant = new ArrayCollection();
         $this->invitationsAsRecipient = new ArrayCollection();
         $this->invitationsAsSender = new ArrayCollection();
+        $this->suggestions = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -187,6 +191,36 @@ class Profile
             // set the owning side to null (unless already changed)
             if ($invitationsAsSender->getSender() === $this) {
                 $invitationsAsSender->setSender(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Suggestion>
+     */
+    public function getSuggestions(): Collection
+    {
+        return $this->suggestions;
+    }
+
+    public function addSuggestion(Suggestion $suggestion): static
+    {
+        if (!$this->suggestions->contains($suggestion)) {
+            $this->suggestions->add($suggestion);
+            $suggestion->setSupportedBy($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSuggestion(Suggestion $suggestion): static
+    {
+        if ($this->suggestions->removeElement($suggestion)) {
+            // set the owning side to null (unless already changed)
+            if ($suggestion->getSupportedBy() === $this) {
+                $suggestion->setSupportedBy(null);
             }
         }
 

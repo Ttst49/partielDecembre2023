@@ -156,4 +156,97 @@ class PrivateEventController extends AbstractController
         return $this->json($response,201,[],["groups"=>"forInvitationPurpose"]);
     }
 
+    /**
+     * @param Event $event
+     * @param EntityManagerInterface $manager
+     * @return Response
+     * change the status of an event between scheduled or canceled
+     */
+    #[Route('/private/event/changeStatus/{id}',methods: "PUT")]
+    public function changeEventStatus(Event $event, EntityManagerInterface $manager):Response{
+
+        $response = [
+            "content"=>"Your event has been canceled with success",
+            "status"=>200,
+            "event"=>$event
+        ];
+
+        if ($event->isIsScheduled() === true){
+            $event->setIsScheduled(false);
+        }else{
+            $event->setIsScheduled(true);
+            $response["content"] = "Your event has been scheduled again!";
+        }
+
+        return $this->json($response,200);
+    }
+
+
+    /**
+     * @param Event $event
+     * @param SerializerInterface $serializer
+     * @param Request $request
+     * @param EntityManagerInterface $manager
+     * @return Response
+     * edit an event and it infos
+     */
+    #[Route('/private/event/edit/{id}',methods: "PUT")]
+    public function editPrivateEvent( Event $event,
+                                       SerializerInterface $serializer,
+                                       Request $request,
+                                       EntityManagerInterface $manager):Response{
+
+        $editedPrivateEvent = $serializer->deserialize($request->getContent(),Event::class,"json",["object_to_populate"=>$event]);
+
+
+        $response = [
+            "content"=>"You updated a private Event!",
+            "status"=>201,
+            "new Event Infos"=>$editedPrivateEvent
+        ];
+
+
+
+        if ($editedPrivateEvent->getEndOn() < $editedPrivateEvent->getstartOn() ){
+            $response = [
+                "content"=>"You can't define an end date arriving after the starting date",
+                "status"=>403,
+            ];
+        }elseif ($editedPrivateEvent->getstartOn() < new \DateTime()){
+            $response = [
+                "content"=>"You can't define a starting date before today",
+                "status"=>403,
+            ];
+        }else{
+            $manager->persist($editedPrivateEvent);
+            $manager->flush();
+        }
+
+
+        return $this->json($response,200,[],["groups"=>"forEventIndexing"]);
+    }
+
+
+    /**
+     * @param Event $event
+     * @return Response
+     * get all the contributions reunited (suggestions and supported)
+     */
+    #[Route('/private/event/showContributions/{id}',methods: "GET")]
+    public function showContributions(Event $event):Response{
+        $response = [
+            "content"=>"There are all the contributions in this private event",
+            "status"=>200,
+            "suggestions" => $event->getSuggestions(),
+            "supported"=>$event->getSupported()
+        ];
+
+
+        return $this->json($response,200,[],["groups"=>"forGroupIndexing"]);
+    }
+
+
+
+
+
 }

@@ -60,13 +60,25 @@ class Event
     #[ORM\OneToMany(mappedBy: 'toEvent', targetEntity: Invitation::class, orphanRemoval: true)]
     private Collection $invitationsToEvent;
 
+    #[Groups(["forGroupIndexing"])]
     #[ORM\Column]
     private ?bool $isScheduled = null;
+
+    #[Groups(["forGroupIndexing"])]
+    #[ORM\OneToMany(mappedBy: 'associatedEvent', targetEntity: Suggestion::class)]
+    private Collection $suggestions;
+
+    #[Groups(["forGroupIndexing"])]
+    #[ORM\OneToMany(mappedBy: 'associatedToEvent', targetEntity: Supported::class)]
+    private Collection $supported;
 
     public function __construct()
     {
         $this->participants = new ArrayCollection();
         $this->invitationsToEvent = new ArrayCollection();
+        $this->suggestions = new ArrayCollection();
+        $this->supported = new ArrayCollection();
+        $this->isScheduled = true;
     }
 
     public function getId(): ?int
@@ -234,6 +246,66 @@ class Event
     public function setIsScheduled(bool $isScheduled): static
     {
         $this->isScheduled = $isScheduled;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Suggestion>
+     */
+    public function getSuggestions(): Collection
+    {
+        return $this->suggestions;
+    }
+
+    public function addSuggestion(Suggestion $suggestion): static
+    {
+        if (!$this->suggestions->contains($suggestion)) {
+            $this->suggestions->add($suggestion);
+            $suggestion->setAssociatedEvent($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSuggestion(Suggestion $suggestion): static
+    {
+        if ($this->suggestions->removeElement($suggestion)) {
+            // set the owning side to null (unless already changed)
+            if ($suggestion->getAssociatedEvent() === $this) {
+                $suggestion->setAssociatedEvent(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Supported>
+     */
+    public function getSupported(): Collection
+    {
+        return $this->supported;
+    }
+
+    public function addSupported(Supported $supported): static
+    {
+        if (!$this->supported->contains($supported)) {
+            $this->supported->add($supported);
+            $supported->setAssociatedToEvent($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSupported(Supported $supported): static
+    {
+        if ($this->supported->removeElement($supported)) {
+            // set the owning side to null (unless already changed)
+            if ($supported->getAssociatedToEvent() === $this) {
+                $supported->setAssociatedToEvent(null);
+            }
+        }
 
         return $this;
     }

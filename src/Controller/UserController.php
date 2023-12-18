@@ -32,7 +32,11 @@ class UserController extends AbstractController
     }
 
 
-
+    /**
+     * @param Request $request
+     * @return Response
+     * show all invitations from current user
+     */
     #[Route('/invitations/index',methods: "GET")]
     public function getInvitations(Request $request):Response{
 
@@ -47,6 +51,14 @@ class UserController extends AbstractController
         return $this->json($response,200,[],["groups"=>"forInvitationPurpose"]);
     }
 
+
+    /**
+     * @param Invitation $invitation
+     * @param InvitationStatusRepository $repository
+     * @param EntityManagerInterface $manager
+     * @return Response
+     * accept an invitation from ID
+     */
     #[Route('/invitations/accept/{id}', methods: "PUT")]
     public function acceptInvitation(Invitation $invitation,
                                      InvitationStatusRepository $repository,
@@ -80,7 +92,13 @@ class UserController extends AbstractController
     }
 
 
-
+    /**
+     * @param Invitation $invitation
+     * @param InvitationStatusRepository $repository
+     * @param EntityManagerInterface $manager
+     * @return Response
+     * deny an invitation from ID
+     */
     #[Route('/invitations/deny/{id}',methods: "PUT")]
     public function denyInvitation(Invitation $invitation,
                                    InvitationStatusRepository $repository,
