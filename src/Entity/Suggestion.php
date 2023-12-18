@@ -27,9 +27,6 @@ class Suggestion
     #[ORM\Column(type: Types::TEXT)]
     private ?string $title = null;
 
-    #[ORM\OneToOne(mappedBy: 'associatedToSuggestion', cascade: ['persist', 'remove'])]
-    private ?Supported $supported = null;
-
     #[ORM\ManyToOne(inversedBy: 'suggestions')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Event $associatedEvent = null;
@@ -75,27 +72,6 @@ class Suggestion
         return $this;
     }
 
-    public function getSupported(): ?Supported
-    {
-        return $this->supported;
-    }
-
-    public function setSupported(?Supported $supported): static
-    {
-        // unset the owning side of the relation if necessary
-        if ($supported === null && $this->supported !== null) {
-            $this->supported->setAssociatedToSuggestion(null);
-        }
-
-        // set the owning side of the relation if necessary
-        if ($supported !== null && $supported->getAssociatedToSuggestion() !== $this) {
-            $supported->setAssociatedToSuggestion($this);
-        }
-
-        $this->supported = $supported;
-
-        return $this;
-    }
 
     public function getAssociatedEvent(): ?Event
     {

@@ -12,13 +12,13 @@ use Symfony\Component\Serializer\Attribute\Groups;
 #[ORM\Entity(repositoryClass: ProfileRepository::class)]
 class Profile
 {
-    #[Groups(["forEventIndexing","forUserIndexing","forInvitationPurpose"])]
+    #[Groups(["forEventIndexing","forUserIndexing","forInvitationPurpose","forGroupIndexing"])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[Groups(["forEventIndexing","forUserIndexing","forInvitationPurpose"])]
+    #[Groups(["forEventIndexing","forUserIndexing","forInvitationPurpose","forGroupIndexing"])]
     #[ORM\Column(type: Types::TEXT)]
     private ?string $displayName = null;
 
@@ -42,6 +42,9 @@ class Profile
     #[ORM\OneToMany(mappedBy: 'supportedBy', targetEntity: Suggestion::class)]
     private Collection $suggestions;
 
+    #[ORM\OneToMany(mappedBy: 'supportedBy', targetEntity: SupportedStandalone::class)]
+    private Collection $supportedStandalones;
+
     public function __construct()
     {
         $this->events = new ArrayCollection();
@@ -49,6 +52,7 @@ class Profile
         $this->invitationsAsRecipient = new ArrayCollection();
         $this->invitationsAsSender = new ArrayCollection();
         $this->suggestions = new ArrayCollection();
+        $this->supportedStandalones = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -221,6 +225,36 @@ class Profile
             // set the owning side to null (unless already changed)
             if ($suggestion->getSupportedBy() === $this) {
                 $suggestion->setSupportedBy(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, SupportedStandalone>
+     */
+    public function getSupportedStandalones(): Collection
+    {
+        return $this->supportedStandalones;
+    }
+
+    public function addSupportedStandalone(SupportedStandalone $supportedStandalone): static
+    {
+        if (!$this->supportedStandalones->contains($supportedStandalone)) {
+            $this->supportedStandalones->add($supportedStandalone);
+            $supportedStandalone->setSupportedBy($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSupportedStandalone(SupportedStandalone $supportedStandalone): static
+    {
+        if ($this->supportedStandalones->removeElement($supportedStandalone)) {
+            // set the owning side to null (unless already changed)
+            if ($supportedStandalone->getSupportedBy() === $this) {
+                $supportedStandalone->setSupportedBy(null);
             }
         }
 

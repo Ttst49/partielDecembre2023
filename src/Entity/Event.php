@@ -68,17 +68,18 @@ class Event
     #[ORM\OneToMany(mappedBy: 'associatedEvent', targetEntity: Suggestion::class)]
     private Collection $suggestions;
 
-    #[Groups(["forGroupIndexing"])]
-    #[ORM\OneToMany(mappedBy: 'associatedToEvent', targetEntity: Supported::class)]
-    private Collection $supported;
+    #[ORM\OneToMany(mappedBy: 'associatedEvent', targetEntity: SupportedStandalone::class, orphanRemoval: true)]
+    private Collection $supportedStandalones;
+
+
 
     public function __construct()
     {
         $this->participants = new ArrayCollection();
         $this->invitationsToEvent = new ArrayCollection();
         $this->suggestions = new ArrayCollection();
-        $this->supported = new ArrayCollection();
         $this->isScheduled = true;
+        $this->supportedStandalones = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -281,33 +282,22 @@ class Event
     }
 
     /**
-     * @return Collection<int, Supported>
+     * @return Collection<int, SupportedStandalone>
      */
-    public function getSupported(): Collection
+    public function getSupportedStandalones(): Collection
     {
-        return $this->supported;
+        return $this->supportedStandalones;
     }
 
-    public function addSupported(Supported $supported): static
+    public function addSupportedStandalone(SupportedStandalone $supportedStandalone): static
     {
-        if (!$this->supported->contains($supported)) {
-            $this->supported->add($supported);
-            $supported->setAssociatedToEvent($this);
+        if (!$this->supportedStandalones->contains($supportedStandalone)) {
+            $this->supportedStandalones->add($supportedStandalone);
+            $supportedStandalone->setAssociatedEvent($this);
         }
 
         return $this;
     }
 
-    public function removeSupported(Supported $supported): static
-    {
-        if ($this->supported->removeElement($supported)) {
-            // set the owning side to null (unless already changed)
-            if ($supported->getAssociatedToEvent() === $this) {
-                $supported->setAssociatedToEvent(null);
-            }
-        }
-
-        return $this;
-    }
 
 }

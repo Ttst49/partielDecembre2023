@@ -5,12 +5,14 @@ namespace App\Controller;
 use App\Entity\Event;
 use App\Entity\Invitation;
 use App\Entity\Profile;
+use App\Entity\Suggestion;
 use App\Repository\EventRepository;
 use App\Repository\InvitationStatusRepository;
 use App\Repository\ProfileRepository;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
+use phpDocumentor\Reflection\Types\True_;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -230,7 +232,7 @@ class PrivateEventController extends AbstractController
     /**
      * @param Event $event
      * @return Response
-     * get all the contributions reunited (suggestions and supported)
+     * get all the contributions
      */
     #[Route('/private/event/showContributions/{id}',methods: "GET")]
     public function showContributions(Event $event):Response{
@@ -238,8 +240,115 @@ class PrivateEventController extends AbstractController
             "content"=>"There are all the contributions in this private event",
             "status"=>200,
             "suggestions" => $event->getSuggestions(),
-            "supported"=>$event->getSupported()
+            "supported"=>$event->getSupportedStandalones()
         ];
+
+
+        return $this->json($response,200,[],["groups"=>"forGroupIndexing"]);
+    }
+
+
+    /**
+     * @param Event $event
+     * @return Response
+     * get all suggestions for an event
+     */
+    #[Route('/private/event/showSuggestions/{id}',methods: "GET")]
+    public function showSuggestions(Event $event):Response{
+        $response = [
+            "content"=>"There are all the contributions in this private event",
+            "status"=>200,
+            "suggestions" => $event->getSuggestions(),
+        ];
+
+        return $this->json($response,200,[],["groups"=>"forGroupIndexing"]);
+    }
+
+
+    /**
+     * @param Event $event
+     * @param SerializerInterface $serializer
+     * @param Request $request
+     * @param EntityManagerInterface $manager
+     * @return Response
+     * as a host add a suggestion for an event
+     */
+    #[Route('/private/event/addSuggestion/{id}',methods: "POST")]
+    public function addSuggestion(Event $event,
+                                  SerializerInterface $serializer,
+                                  Request $request,
+                                  EntityManagerInterface $manager):Response{
+
+        $response = [
+            "content"=>"You're not the host, then you can't add a suggestion, try adding a supported otherwise",
+            "status"=>403,
+        ];
+
+        if($event->getHost() == $this->getUser()->getProfile()){
+            $newSuggestion = $serializer->deserialize($request->getContent(),Suggestion::class,"json");
+            $newSuggestion->setIsSupported(false);
+            $newSuggestion->setAssociatedEvent($event);
+
+            $manager->persist($newSuggestion);
+            $manager->flush();
+
+            $response =[
+                "content"=>"You successfully add a suggestion to the event with id ".$event->getId(),
+                "status"=>201,
+                "suggestion"=>$newSuggestion
+            ];
+        }
+
+
+        return $this->json($response,200,[],["groups"=>"forGroupIndexing"]);
+    }
+
+
+    /**
+     * @param Suggestion $suggestion
+     * @return Response
+     * support and stop supporting suggestion and transform it into a contribution
+     */
+    #[Route('/private/event/stopSupportSuggestion/{id}',methods: "PUT")]
+    #[Route('/private/event/supportSuggestion/{id}',methods: "PUT")]
+    public function supportSuggestionManagement(Suggestion $suggestion,
+                                      EntityManagerInterface $manager,
+                                      Request $request):Response{
+
+        $associatedEvent = $suggestion->getAssociatedEvent();
+
+        $response = [
+            "content"=>"You made a contribution and transform a suggestion into reality!",
+            "status"=>201,
+            "suggestions"=>$associatedEvent->getSuggestions(),
+            "supports"=>$associatedEvent->getSupportedStandalones()
+        ];
+
+
+
+        if ($request->get("_route") == "app_privateevent_supportsuggestionmanagement_1"){
+            if ($suggestion->getSupportedBy() === false){
+                $suggestion->setIsSupported(true);
+                $suggestion->setSupportedBy($this->getUser()->getProfile());
+            }else{
+                $response["content"]= "This suggestion already have a support!";
+            }
+
+        }else{
+            if ($suggestion->getSupportedBy() == $this->getUser()->getProfile()){
+                $suggestion->setIsSupported(false);
+                $suggestion->setSupportedBy(null);
+                $response["content"] = "You stopped supporting this suggestion!";
+            }else{
+                $response["content"] = "You seem not to be the one who supported this suggestion";
+            }
+
+        }
+
+
+
+        $manager->persist($suggestion);
+        $manager->flush();
 
 
         return $this->json($response,200,[],["groups"=>"forGroupIndexing"]);

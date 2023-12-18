@@ -2,27 +2,27 @@
 
 namespace App\Repository;
 
-use App\Entity\Supported;
+use App\Entity\SupportedStandalone;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<Supported>
+ * @extends ServiceEntityRepository<SupportedStandalone>
  *
- * @method Supported|null find($id, $lockMode = null, $lockVersion = null)
- * @method Supported|null findOneBy(array $criteria, array $orderBy = null)
- * @method Supported[]    findAll()
- * @method Supported[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method SupportedStandalone|null find($id, $lockMode = null, $lockVersion = null)
+ * @method SupportedStandalone|null findOneBy(array $criteria, array $orderBy = null)
+ * @method SupportedStandalone[]    findAll()
+ * @method SupportedStandalone[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class SupportedRepository extends ServiceEntityRepository
+class SupportedStandaloneRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Supported::class);
+        parent::__construct($registry, SupportedStandalone::class);
     }
 
 //    /**
-//     * @return Supported[] Returns an array of Supported objects
+//     * @return SupportedStandalone[] Returns an array of SupportedStandalone objects
 //     */
 //    public function findByExampleField($value): array
 //    {
@@ -36,7 +36,7 @@ class SupportedRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?Supported
+//    public function findOneBySomeField($value): ?SupportedStandalone
 //    {
 //        return $this->createQueryBuilder('s')
 //            ->andWhere('s.exampleField = :val')
