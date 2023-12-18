@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: EventRepository::class)]
 class Event
@@ -26,11 +27,11 @@ class Event
     #[ORM\Column(type: Types::TEXT)]
     private ?string $description = null;
 
-    #[Groups(["forEventIndexing"])]
+    #[Assert\GreaterThanOrEqual('today UTC+3')]
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $startOn = null;
 
-    #[Groups(["forEventIndexing"])]
+    #[Assert\GreaterThanOrEqual(propertyPath: "startOn")]
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $endOn = null;
 
@@ -50,9 +51,19 @@ class Event
     #[ORM\ManyToMany(targetEntity: Profile::class, inversedBy: 'eventsAsParticipant')]
     private Collection $participants;
 
+    #[Groups(["forEventIndexing"])]
+    private string $startDateInFormat;
+
+    #[Groups(["forEventIndexing"])]
+    private string $endDateInFormat;
+
+    #[ORM\OneToMany(mappedBy: 'toEvent', targetEntity: Invitation::class, orphanRemoval: true)]
+    private Collection $invitationsToEvent;
+
     public function __construct()
     {
         $this->participants = new ArrayCollection();
+        $this->invitationsToEvent = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -84,6 +95,7 @@ class Event
         return $this;
     }
 
+
     public function getstartOn(): ?\DateTimeInterface
     {
         return $this->startOn;
@@ -92,6 +104,7 @@ class Event
     public function setstartOn(\DateTimeInterface $startOn): static
     {
         $this->startOn = $startOn;
+        $this->startDateInFormat = $startOn->format("d/m/y");
 
         return $this;
     }
@@ -104,6 +117,7 @@ class Event
     public function setEndOn(\DateTimeInterface $endOn): static
     {
         $this->endOn = $endOn;
+        $this->endDateInFormat = $endOn->format("d/m/y");
 
         return $this;
     }
@@ -167,4 +181,46 @@ class Event
 
         return $this;
     }
+
+    public function getStartDateInFormat(): string
+    {
+        return $this->startDateInFormat;
+    }
+
+
+    public function getEndDateInFormat(): string
+    {
+        return $this->endDateInFormat;
+    }
+
+    /**
+     * @return Collection<int, Invitation>
+     */
+    public function getInvitationsToEvent(): Collection
+    {
+        return $this->invitationsToEvent;
+    }
+
+    public function addInvitationsToEvent(Invitation $invitationsToEvent): static
+    {
+        if (!$this->invitationsToEvent->contains($invitationsToEvent)) {
+            $this->invitationsToEvent->add($invitationsToEvent);
+            $invitationsToEvent->setToEvent($this);
+        }
+
+        return $this;
+    }
+
+    public function removeInvitationsToEvent(Invitation $invitationsToEvent): static
+    {
+        if ($this->invitationsToEvent->removeElement($invitationsToEvent)) {
+            // set the owning side to null (unless already changed)
+            if ($invitationsToEvent->getToEvent() === $this) {
+                $invitationsToEvent->setToEvent(null);
+            }
+        }
+
+        return $this;
+    }
+
 }

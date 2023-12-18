@@ -33,10 +33,18 @@ class Profile
     #[ORM\ManyToMany(targetEntity: Event::class, mappedBy: 'participants')]
     private Collection $eventsAsParticipant;
 
+    #[ORM\OneToMany(mappedBy: 'recipient', targetEntity: Invitation::class)]
+    private Collection $invitationsAsRecipient;
+
+    #[ORM\OneToMany(mappedBy: 'sender', targetEntity: Invitation::class)]
+    private Collection $invitationsAsSender;
+
     public function __construct()
     {
         $this->events = new ArrayCollection();
         $this->eventsAsParticipant = new ArrayCollection();
+        $this->invitationsAsRecipient = new ArrayCollection();
+        $this->invitationsAsSender = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -120,6 +128,66 @@ class Profile
     {
         if ($this->eventsAsParticipant->removeElement($eventsAsParticipant)) {
             $eventsAsParticipant->removeParticipant($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Invitation>
+     */
+    public function getInvitationsAsRecipient(): Collection
+    {
+        return $this->invitationsAsRecipient;
+    }
+
+    public function addInvitationsAsRecipient(Invitation $invitationsAsRecipient): static
+    {
+        if (!$this->invitationsAsRecipient->contains($invitationsAsRecipient)) {
+            $this->invitationsAsRecipient->add($invitationsAsRecipient);
+            $invitationsAsRecipient->setRecipient($this);
+        }
+
+        return $this;
+    }
+
+    public function removeInvitationsAsRecipient(Invitation $invitationsAsRecipient): static
+    {
+        if ($this->invitationsAsRecipient->removeElement($invitationsAsRecipient)) {
+            // set the owning side to null (unless already changed)
+            if ($invitationsAsRecipient->getRecipient() === $this) {
+                $invitationsAsRecipient->setRecipient(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Invitation>
+     */
+    public function getInvitationsAsSender(): Collection
+    {
+        return $this->invitationsAsSender;
+    }
+
+    public function addInvitationsAsSender(Invitation $invitationsAsSender): static
+    {
+        if (!$this->invitationsAsSender->contains($invitationsAsSender)) {
+            $this->invitationsAsSender->add($invitationsAsSender);
+            $invitationsAsSender->setSender($this);
+        }
+
+        return $this;
+    }
+
+    public function removeInvitationsAsSender(Invitation $invitationsAsSender): static
+    {
+        if ($this->invitationsAsSender->removeElement($invitationsAsSender)) {
+            // set the owning side to null (unless already changed)
+            if ($invitationsAsSender->getSender() === $this) {
+                $invitationsAsSender->setSender(null);
+            }
         }
 
         return $this;
