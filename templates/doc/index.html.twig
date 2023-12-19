@@ -5,100 +5,13 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="{{ asset('build/doc.css') }}">
     <title>API DOC</title>
-    <style>
-        .uppercase{
-            text-transform: uppercase;
-        }
-
-        body{
-            font-family: Urbanist, Roboto, sans-serif;
-            background-color: white;
-            color: black;
-        }
-
-        .blocOfCode{
-            display: flex;
-            flex-direction: column;
-            margin: 10px;
-        }
-
-        .jsonBody{
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #1e1e1e;
-            padding: 20px;
-            flex-direction: column;
-        }
-
-        .code{
-            background-color: #252525;
-            padding: 30px;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: space-around;
-        }
-
-        .codeTitle{
-            background-color: white;
-            color: black;
-            width: fit-content;
-            max-width: 25%;
-            border-radius: 15px;
-            padding: 10px;
-            text-transform: lowercase;
-        }
-
-        code{
-            width: fit-content;
-            padding: 5px;
-            background-color: slategrey;
-        }
-
-        .button{
-            padding: 10px;
-            width: fit-content;
-            border-radius: 25px;
-            text-transform: uppercase;
-            color: black;
-        }
-
-        .example{
-            background-color: blue;
-        }
-
-        .get{
-            background-color: darkgreen;
-        }
-
-        .post{
-            background-color: #b7910d;
-        }
-
-        .put{
-            background-color: dodgerblue;
-        }
-
-        .delete{
-            background-color: indianred;
-        }
-
-        .log{
-            padding: 10px;
-            width: fit-content;
-            border-radius: 25px;
-            background-color: coral;
-        }
-    </style>
-
 </head>
 <body>
 <div class="container">
     <div class="content">
-        default path: <pre style="">partiel.thibautstachnick.com/api</pre>
+        <h4>default path:</h4> <pre style="">partiel.thibautstachnick.com/api</pre>
 
         <h3>Example</h3>
         <div class="blocOfCode">
@@ -108,7 +21,7 @@
                 <div class="button example">method</div>
                 <div class="log">Condition (show only if required)</div>
             </div>
-            <div class="jsonBody"><span>Example</span><span>{ <br> "json":true,<br> "api":"easy"<br> }</span></div>
+            <div class="jsonBody"><span>Example if json needed</span><span>{ <br> "json":true,<br> "api":"easy"<br> }</span></div>
         </div>
 
         <h2 class="uppercase">users</h2>
@@ -218,6 +131,15 @@
             <div class="code">
                 <p class="codeTitle">Show all the private events since you're participating</p>
                 <code>/private/event/index</code>
+                <div class="button get">get</div>
+                <div class="log">loggedIn</div>
+            </div>
+        </div>
+
+        <div class="blocOfCode">
+            <div class="code">
+                <p class="codeTitle">Show a unique private event since you're participating</p>
+                <code>/private/event/showEvent/{Event ID}</code>
                 <div class="button get">get</div>
                 <div class="log">loggedIn</div>
             </div>
