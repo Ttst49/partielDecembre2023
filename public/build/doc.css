@@ -1,0 +1,85 @@
+.uppercase{
+    text-transform: uppercase;
+}
+
+body{
+    font-family: Urbanist, Roboto, sans-serif;
+    background-color: white;
+    color: black;
+}
+
+.blocOfCode{
+    display: flex;
+    flex-direction: column;
+    margin: 10px;
+}
+
+.jsonBody{
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #1e1e1e;
+    padding: 20px;
+    flex-direction: column;
+}
+
+.code{
+    background-color: #252525;
+    padding: 30px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+
+.codeTitle{
+    background-color: white;
+    color: black;
+    width: fit-content;
+    max-width: 25%;
+    border-radius: 15px;
+    padding: 10px;
+    text-transform: lowercase;
+}
+
+code{
+    width: fit-content;
+    padding: 5px;
+    background-color: slategrey;
+}
+
+.button{
+    padding: 10px;
+    width: fit-content;
+    border-radius: 25px;
+    text-transform: uppercase;
+    color: black;
+}
+
+.example{
+    background-color: blue;
+}
+
+.get{
+    background-color: darkgreen;
+}
+
+.post{
+    background-color: #b7910d;
+}
+
+.put{
+    background-color: dodgerblue;
+}
+
+.delete{
+    background-color: indianred;
+}
+
+.log{
+    padding: 10px;
+    width: fit-content;
+    border-radius: 25px;
+    background-color: coral;
+}

@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Entity\Event;
 use App\Entity\Invitation;
-use App\Entity\Profile;
 use App\Entity\Suggestion;
 use App\Entity\SupportedStandalone;
 use App\Repository\EventRepository;
@@ -13,7 +12,6 @@ use App\Repository\ProfileRepository;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
-use phpDocumentor\Reflection\Types\True_;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -307,6 +305,8 @@ class PrivateEventController extends AbstractController
 
     /**
      * @param Suggestion $suggestion
+     * @param EntityManagerInterface $manager
+     * @param Request $request
      * @return Response
      * support suggestion and transform it into a contribution and stop supporting suggestion
      */
@@ -355,7 +355,14 @@ class PrivateEventController extends AbstractController
         return $this->json($response,200,[],["groups"=>"forGroupIndexing"]);
     }
 
-
+    /**
+     * @param Event $event
+     * @param SerializerInterface $serializer
+     * @param EntityManagerInterface $manager
+     * @param Request $request
+     * @return Response
+     * add a standalone support to the event
+     */
     #[Route('/private/event/addSupport/{id}',methods: "POST")]
     public function addStandaloneSupport(Event $event,
                                          SerializerInterface $serializer,
@@ -379,6 +386,12 @@ class PrivateEventController extends AbstractController
     }
 
 
+    /**
+     * @param SupportedStandalone $standalone
+     * @param EntityManagerInterface $manager
+     * @return Response
+     * remove a support if you created It or if you're hosting the event
+     */
     #[Route('/private/event/removeSupport/{id}',methods: "DELETE")]
     public function removeStandaloneSupport(SupportedStandalone $standalone,
                                             EntityManagerInterface $manager):Response{
