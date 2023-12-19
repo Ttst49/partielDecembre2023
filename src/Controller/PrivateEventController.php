@@ -369,18 +369,32 @@ class PrivateEventController extends AbstractController
                                          EntityManagerInterface $manager,
                                          Request $request):Response{
 
-        $newSupport = $serializer->deserialize($request->getContent(),SupportedStandalone::class,"json");
-        $newSupport->setSupportedBy($this->getUser()->getProfile());
-        $newSupport->setAssociatedEvent($event);
-
-        $manager->persist($newSupport);
-        $manager->flush();
 
         $response = [
-            "content"=>"You made a contribution to this event",
+            "content"=>"You're not in this event, so you can't add a support!",
             "status"=>200,
-            "new contribution"=>$newSupport
         ];
+
+        $participantsInArray = new ArrayCollection();
+
+        foreach ($event->getParticipants() as $participant){
+            $participantsInArray->add($participant);}
+
+        foreach ($participantsInArray as $participantInArray){
+
+            if ($participantInArray === $this->getUser()->getProfile()){
+                $newSupport = $serializer->deserialize($request->getContent(),SupportedStandalone::class,"json");
+                $newSupport->setSupportedBy($this->getUser()->getProfile());
+                $newSupport->setAssociatedEvent($event);
+
+                $manager->persist($newSupport);
+                $manager->flush();
+
+                $response["content"] = "You made a contribution to this event";
+                $response["support"] = $newSupport;
+            }
+        }
+
 
         return $this->json($response,200,[],["groups"=>"forGroupIndexing"]);
     }
