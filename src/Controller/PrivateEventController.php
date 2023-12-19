@@ -52,6 +52,42 @@ class PrivateEventController extends AbstractController
 
 
     /**
+     * @param Event $event
+     * @return Response
+     * get a unique private event you're part of
+     */
+    #[Route('/private/event/showEvent/{id}',methods: "GET")]
+    public function showPrivateEvent(Event $event):Response{
+
+
+
+        $privateEventParticipants = new ArrayCollection();
+
+        foreach ($event->getParticipants() as $participant){
+            $privateEventParticipants->add($participant);
+        }
+
+        foreach ($privateEventParticipants as $privateEventParticipant){
+            if ($privateEventParticipant !== $this->getUser()->getProfile()){
+                $response = [
+                    "content"=>"You're not part of this private event",
+                    "status"=>200
+                ];
+            }else{
+                $response = [
+                    "content"=>"There is the private event with id ".$event->getId(),
+                    "status"=>200,
+                    "event"=>$event
+                ];
+            }
+        }
+
+
+        return $this->json($response,200,[],["groups"=>"forEventIndexing"]);
+    }
+
+
+    /**
      * @param SerializerInterface $serializer
      * @param Request $request
      * @param EntityManagerInterface $manager
