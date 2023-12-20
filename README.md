@@ -1,2 +1,2 @@
 API 
-L'api complète avec sa documentation ici : https://partiel.thibautstachnick.com
+L'api complète avec sa documentation ici : https://apipartiel.thibautstachnick.com
